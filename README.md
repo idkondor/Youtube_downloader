@@ -1,11 +1,14 @@
 # Youtube_downloader
 Script to extract mp3 from youtube videos
 
+Usage steps:
 1. Install youtube-dl module
 http://ytdl-org.github.io/youtube-dl/download.html
 
 2. Download git repository
 https://github.com/idkondor/Youtube_downloader.git
+
+3. Put links to youtube videos into 'Input_links.csv' file
 
 # Linux Systems
 
