@@ -1,6 +1,8 @@
 from __future__ import unicode_literals
 import youtube_dl
 import secrets
+import time
+import random
 from argparse import ArgumentParser
 parser = ArgumentParser()
 parser.add_argument("-i", "--docIn", dest="pathToDoc", help="Input folder path with links!")
@@ -12,7 +14,7 @@ pathOutput = args.pathOutput
 pathToDocOut = args.pathToDocOut
 
 
-class MyLogger(object):
+class ErrorHandler(object):
     def debug(self, msg):
         pass
 
@@ -31,7 +33,7 @@ def destination_control(link_type, gender, language):
         return path
 
 
-def my_hook(d):
+def downloading_status(d):
     if d['status'] == 'finished':
         print('Done downloading, now converting ...')
 
@@ -47,8 +49,8 @@ with open(pathToDoc) as linksFile:
 linksSheet = open(pathToDocOut, "r+")
 linksSheet.write("URL, Type, Gender, Language, Duration, Comments, Availability, MD5" + "\n")
 
-for youtube_link in linksDictionaryList:
-    print(youtube_link)
+for dictionaryLink in linksDictionaryList:
+    print(dictionaryLink)
     hashName = secrets.token_hex(nbytes=16)
     ydl_opts = {
         'format': 'bestaudio/best',
@@ -57,24 +59,25 @@ for youtube_link in linksDictionaryList:
             'preferredcodec': 'mp3',
             'preferredquality': '192',
         }],
-        'logger': MyLogger(),
-        'progress_hooks': [my_hook],
+        'logger': ErrorHandler(),
+        'progress_hooks': [downloading_status],
         'noplaylist': True,
-        'outtmpl': pathOutput + destination_control(youtube_link["Type"], youtube_link["Gender"],
-                                                    youtube_link["Language"]) + hashName + '.%(ext)s'
+        'outtmpl': pathOutput + destination_control(dictionaryLink["Type"], dictionaryLink["Gender"],
+                                                    dictionaryLink["Language"]) + hashName + '.%(ext)s'
     }
     try:
         with youtube_dl.YoutubeDL(ydl_opts) as ydl:
-            ydl.download([youtube_link["URL"]])
-            youtube_link["Availability"] = "Valid"
+            ydl.download([dictionaryLink["URL"]])
+            dictionaryLink["Availability"] = "Valid"
     except:
-        youtube_link["Availability"] = "INVALID!"
+        dictionaryLink["Availability"] = "INVALID!"
     linksDictValues = []
-    dictItems = youtube_link.items()
+    dictItems = dictionaryLink.items()
     for value in dictItems:
         if value[0] == "MD5\n":
             linksSheet.write(hashName + "\n")
             break
         linksSheet.write(value[1] + ", ")
+    time.sleep(random.randint(10, 30))
 
 linksSheet.close()
